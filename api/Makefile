@@ -79,7 +79,7 @@ _buildAll:
 	@rm -rf results.txt
 
 _deployAll:
-	@find ./src -depth -type d -not -name 'src' -not -path "*/node_modules/*" -not -name 'node_modules' -not -name '.serverless' > results.txt
+	@find ./src -type d -not -name 'src' -not -path "*/node_modules/*" -not -name 'node_modules' -not -name '.serverless' > results.txt
 	@while read line; do \
 		echo "Deploying $$line..."; \
 		cd $$line && serverless deploy --stage ${STAGE}; \
