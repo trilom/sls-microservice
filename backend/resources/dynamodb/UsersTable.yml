@@ -1,0 +1,16 @@
+Resources:
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: "user_id"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "user_id"
+          KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.${self:provider.stage}.UsersTableRCU}
+        WriteCapacityUnits: ${self:custom.${self:provider.stage}.UsersTableWCU}
+      TableName: ${self:custom.${self:provider.stage}.Stack}-Users-${self:provider.stage}

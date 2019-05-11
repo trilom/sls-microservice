@@ -1,0 +1,5 @@
+Resources:
+  ApiGatewayRestApi:
+    Type: 'AWS::ApiGateway::RestApi'
+    Properties:
+      Name: ${self:service}-${self:provider.stage}

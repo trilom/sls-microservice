@@ -1,0 +1,45 @@
+service: ExampleMicroService-api-__SERVICE__
+
+frameworkVersion: ">=1.0.0 <2.0.0"
+
+custom:
+  prod:
+    Stack: ExampleSite
+    LogLevel: info
+  dev:
+    Stack: ExampleSite
+    LogLevel: debug
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  memorySize: 128
+  timeout: 25
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  apiGateway:
+    restApiId:
+      'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-restApiId-${self:provider.stage}
+    restApiRootResourceId:
+      'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-rootResourceId-${self:provider.stage}
+  logRetentionInDays: 14
+  environment:
+    logLevel: ${self:custom.${self:provider.stage}.LogLevel}
+
+functions:
+  __FUNCTION__:
+    handler: index.handler
+    events:
+      - http:
+          path: /__PATH__
+          method: get
+          cors: true
+          private: true
+
+plugins:
+  - serverless-pseudo-parameters
+  - serverless-iam-roles-per-function
+  - serverless-plugin-reducer

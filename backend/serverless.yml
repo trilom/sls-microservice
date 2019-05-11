@@ -1,0 +1,114 @@
+service: ExampleMicroService
+
+frameworkVersion: ">=1.0.0 <2.0.0"
+
+custom:
+  # You can uncomment this and it will deploy to a custom website.
+  # Provided you give accurate variables in the custom.prod.ApiHostedZone,ApieSite, and ApiSite.
+  # customDomain:
+  #   domainName: ${self:custom.${self:provider.stage}.ApiSite}
+  #   stage: ${self:provider.stage}
+  #   basePath:
+  #   certificateArn: ${self:custom.${self:provider.stage}.ApiCert}
+  #   createRoute53Record: true
+  #   endpointType: 'edge'
+  prod:
+    Stack: ExampleSite
+    LogLevel: info
+    ApiHostedZone: examplesite.us.
+    ApiSite: "prod.examplesite.us"
+    ApiCert: "arn:aws:acm:us-east-1:12345678901:certificate/12345678-b123-a123-c123-abcd1234efgh"
+    StateTableRCU: 5
+    StateTableWCU: 5
+    UsersTableRCU: 5
+    UsersTableWCU: 5
+  dev:
+    Stack: ExampleSite
+    LogLevel: debug
+    ApiHostedZone: examplesite.us.
+    ApiSite: "dev.examplesite.us"
+    ApiCert: "arn:aws:acm:us-east-1:12345678901:certificate/12345678-b123-a123-c123-abcd1234efgh"
+    StateTableRCU: 5
+    StateTableWCU: 5
+    UsersTableRCU: 5
+    UsersTableWCU: 5
+provider:
+  name: aws
+  runtime: nodejs8.10
+  memorySize: 128
+  timeout: 10
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  logRetentionInDays: 14
+  environment:
+    logLevel: ${self:custom.${self:provider.stage}.LogLevel}
+
+# This is to activate serverless-plugin-reducer.
+package:
+  individually: true
+
+functions:
+  # API Root Function, for a health check.
+  Root:
+    handler: src/index.handler
+    events:
+      - http:
+          path: /
+          method: get
+          cors: true
+  # User writes to user table, and sends a message to the State function, which writes to the State table.
+  User:
+    handler: src/user/index.handler
+    environment:
+      stateQueueUrl: !Ref StateQueue
+      usersTable: !Ref UsersTable
+    iamRoleStatements: ${file(resources/iam/UserExecutionRole.yml)}
+    events:
+      - schedule:
+          rate: rate(1 minute)
+  State:
+    handler: src/state/index.handler
+    environment:
+      stateQueueUrl: !Ref StateQueue
+      stateTable: !Ref StateTable
+    iamRoleStatements: ${file(resources/iam/StateExecutionRole.yml)}
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - StateQueue
+              - Arn
+          batchSize: 1
+resources:
+  # API GW defined so you can export the restApiId, as well as name it.
+  - ${file(resources/apigateway/RestApi.yml)}
+
+  # Two DynamoDB tables
+  - ${file(resources/dynamodb/UsersTable.yml)}
+  - ${file(resources/dynamodb/StateTable.yml)}
+
+  # Platform for our two functions to communicate.
+  - ${file(resources/sqs/StateQueue.yml)}
+  # Here we are exporting the RestApiID and the RootResourceId to use in other API Endpoints.
+  - Outputs:
+      ApiGWRestApiId:
+        Value:
+          Ref: ApiGatewayRestApi
+        Export:
+          Name: ${self:custom.${self:provider.stage}.Stack}-restApiId-${self:provider.stage}
+      ApiGWRootResourceId:
+        Value:
+          Fn::GetAtt:
+            - ApiGatewayRestApi
+            - RootResourceId
+        Export:
+          Name: ${self:custom.${self:provider.stage}.Stack}-rootResourceId-${self:provider.stage}
+plugins:
+  # This is for support of #{AWS::Region} when developing ARNs
+  - serverless-pseudo-parameters
+  # This is to provide a iam role per function.
+  - serverless-iam-roles-per-function
+  # Enable this if you want to have a custom domain.  Please be sure to ru serverless create_domain prior to serverless deploy
+  # - serverless-domain-manager
+  # This plugin helps reduce the dependencies for your lambda, speeding uploads and S3 storage.
+  - serverless-plugin-reducer
