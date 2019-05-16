@@ -1,0 +1,16 @@
+Resources:
+  OrdersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: "order_id"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "order_id"
+          KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:custom.${self:provider.stage}.OrdersTableRCU}
+        WriteCapacityUnits: ${self:custom.${self:provider.stage}.OrdersTableWCU}
+      TableName: ${self:custom.${self:provider.stage}.Stack}-Orders-${self:provider.stage}

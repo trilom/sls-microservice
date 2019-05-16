@@ -1,0 +1,63 @@
+service: ExampleMicroService-api-order
+
+frameworkVersion: ">=1.0.0 <2.0.0"
+
+custom:
+  prod:
+    Stack: ExampleSite
+    LogLevel: info
+  dev:
+    Stack: ExampleSite
+    LogLevel: debug
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  memorySize: 128
+  timeout: 10
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  apiGateway:
+    restApiId:
+      'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-restApiId-${self:provider.stage}
+    restApiRootResourceId:
+      'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-rootResourceId-${self:provider.stage}
+  logRetentionInDays: 14
+  environment:
+    logLevel: ${self:custom.${self:provider.stage}.LogLevel}
+
+functions:
+  Order:
+    handler: index.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:Query
+        Resource:
+          - arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/${self:custom.${self:provider.stage}.Stack}-Orders-${self:provider.stage}
+      - Effect: Allow
+        Action:
+          - sqs:SendMessage
+        Resource:
+          - arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:custom.${self:provider.stage}.Stack}-OrdersQueue-${self:provider.stage}
+    environment:
+      ordersTable: ${self:custom.${self:provider.stage}.Stack}-Orders-${self:provider.stage}
+      ordersQueue: https://sqs.#{AWS::Region}.amazonaws.com/#{AWS::AccountId}/${self:custom.${self:provider.stage}.Stack}-OrdersQueue-${self:provider.stage}
+    events:
+      - http:
+          path: /order
+          method: post
+          cors: true
+      - http:
+          path: /order/{orderid}
+          method: get
+          cors: true
+
+plugins:
+  - serverless-pseudo-parameters
+  - serverless-iam-roles-per-function
+  - serverless-plugin-reducer

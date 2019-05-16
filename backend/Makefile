@@ -68,6 +68,7 @@ _buildAll:
 		yarn install --cwd $$line; \
 		cd ${MKFILEPATH}; \
 	done < results.txt
+	@rm -rf results.txt
 	cd ../api && $(MAKE) buildAll
 
 _deployAll:

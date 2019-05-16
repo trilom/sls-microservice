@@ -7,67 +7,6 @@ In order to use this stack you simply run the `make buildAll` and `make deployAl
 ## Why is it designed like this:
 In order to gain fine control over each endpoint of your API this allows you to separate your project into distinct directories to lighten global dependencies.
 
-### Things to note
-#### API Gateway RestApiId Exports and Usage
-Take note in the `./backend/serverless.yml` we are exporting two variables from the stack.  This is for reuse in our child API endpoint stacks:
-export from `./backend/serverless.yml`  
-```yaml
-- Outputs:
-    ApiGWRestApiId:
-      Value:
-        Ref: ApiGatewayRestApi
-      Export:
-        Name: ${self:custom.${self:provider.stage}.Stack}-restApiId-${self:provider.stage}
-    ApiGWRootResourceId:
-      Value:
-        Fn::GetAtt:
-          - ApiGatewayRestApi
-          - RootResourceId
-      Export:
-        Name: ${self:custom.${self:provider.stage}.Stack}-rootResourceId-${self:provider.stage}
-```
-
-import from `./api/src/user/serverless.yml`  
-```yaml
-provider:
-  ...
-  apiGateway:
-    restApiId:
-      'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-restApiId-${self:provider.stage}
-    restApiRootResourceId:
-      'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-rootResourceId-${self:provider.stage}
-```
-
-__Special Consideration:__ When nesting resources within other resources, for example we have the API endpoint of `/user/{userid}/orders`.  This endpoint is served separately from our `/user` endpoint, lets say you are using AWS Cognito for authentication, you can keep these dependencies separate from dependencies that access business function, like `/user/{userid}/orders` accesses the Orders table alone.  
-__How is this accomplished?__  
-1. We first export the shared resources from the parent resource `/user`.  
-export from `./api/src/user/serverless.yml`  
-```yaml
-resources:
-  Outputs:
-    ApiRootUser:
-      Value:
-        Ref: ApiGatewayResourceUser
-      Export:
-        Name: ${self:custom.${self:provider.stage}.Stack}-ApiRootUser-${self:provider.stage}
-    ApiRootUserUseridVar:
-      Value:
-        Ref: ApiGatewayResourceUserUseridVar
-      Export:
-        Name: ${self:custom.${self:provider.stage}.Stack}-ApiRootUserUseridVar-${self:provider.stage}
-```
-2. We then import this shared resources as a `restApiResources` in the child resource `/user/{userid}/orders`  
-import from `./api/src/user/order/serverless.yml`  
-```yaml
-provider:
-  ...
-  apiGateway:
-    restApiId:
-      'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-restApiId-${self:provider.stage}
-    restApiResources:
-      /user/{userid}:
-        'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-ApiRootUserUseridVar-${self:provider.stage}
-```
 ### What does this build?
 This will define an example Serverless infrastructure stack containing:
 1. an API Gateway
@@ -88,7 +27,69 @@ The API functions are split into 3 endpoints where you can implement different p
 `/order` __POST__ - _Create an order._  
 `/order/{orderid}` __GET__ - _Get order information._  
 
-### What does this do?
+### Things to note
+#### API Gateway RestApiId Exports and Usage
+Take note in the `./backend/serverless.yml` we are exporting two variables from the stack.  This is for reuse in our child API endpoint stacks:
+```yaml
+#export from ./backend/serverless.yml
+- Outputs:
+    ApiGWRestApiId:
+      Value:
+        Ref: ApiGatewayRestApi
+      Export:
+        Name: ${self:custom.${self:provider.stage}.Stack}-restApiId-${self:provider.stage}
+    ApiGWRootResourceId:
+      Value:
+        Fn::GetAtt:
+          - ApiGatewayRestApi
+          - RootResourceId
+      Export:
+        Name: ${self:custom.${self:provider.stage}.Stack}-rootResourceId-${self:provider.stage}
+```
+```yaml
+#import from ./api/src/user/serverless.yml
+provider:
+  ...
+  apiGateway:
+    restApiId:
+      'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-restApiId-${self:provider.stage}
+    restApiRootResourceId:
+      'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-rootResourceId-${self:provider.stage}
+```
+
+__Special Consideration:__ When nesting resources within other resources, for example we have the API endpoint of `/user/{userid}/orders`.  This endpoint is served separately from our `/user` endpoint, lets say you are using AWS Cognito for authentication, you can keep these dependencies separate from dependencies that access business function, like `/user/{userid}/orders` accesses the Orders table alone.  
+__How is this accomplished?__  
+1. We first export the shared resources from the parent resource `/user`.  
+
+```yaml
+#export from ./api/src/user/serverless.yml
+resources:
+  Outputs:
+    ApiRootUser:
+      Value:
+        Ref: ApiGatewayResourceUser
+      Export:
+        Name: ${self:custom.${self:provider.stage}.Stack}-ApiRootUser-${self:provider.stage}
+    ApiRootUserUseridVar:
+      Value:
+        Ref: ApiGatewayResourceUserUseridVar
+      Export:
+        Name: ${self:custom.${self:provider.stage}.Stack}-ApiRootUserUseridVar-${self:provider.stage}
+```
+2. We then import this shared resources as a `restApiResources` in the child resource `/user/{userid}/orders`  
+```yaml
+#import from ./api/src/user/order/serverless.yml
+provider:
+  ...
+  apiGateway:
+    restApiId:
+      'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-restApiId-${self:provider.stage}
+    restApiResources:
+      /user/{userid}:
+        'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-ApiRootUserUseridVar-${self:provider.stage}
+```
+
+### Commands
 #### `make buildAll`
 First it will run `yarn install` in the `./backend` directory and then it will run `make buildAll` from the `./api` directory.  This will look at each directory in the `./api/src` directory and run `yarn install` for each.
 #### `make deployAll --STAGE='dev'`

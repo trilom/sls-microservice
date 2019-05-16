@@ -9,7 +9,6 @@
   },
   "devDependencies": {
     "serverless": "^1.41.1",
-    "serverless-domain-manager": "^3.2.1",
     "serverless-iam-roles-per-function": "^2.0.0",
     "serverless-plugin-reducer": "^3.2.1",
     "serverless-pseudo-parameters": "^2.4.0"

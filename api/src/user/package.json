@@ -1,0 +1,17 @@
+{
+  "devDependencies": {
+    "serverless": "^1.42.3",
+    "serverless-iam-roles-per-function": "^2.0.1",
+    "serverless-plugin-reducer": "^3.2.3",
+    "serverless-pseudo-parameters": "^2.4.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "aws-sdk": "^2.456.0",
+    "log4js": "^4.2.0",
+    "moment": "^2.24.0",
+    "serverless-http": "^2.0.1"
+  }
+}

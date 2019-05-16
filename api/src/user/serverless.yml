@@ -1,0 +1,75 @@
+service: ExampleMicroService-api-user
+
+frameworkVersion: ">=1.0.0 <2.0.0"
+
+custom:
+  prod:
+    Stack: ExampleSite
+    LogLevel: info
+  dev:
+    Stack: ExampleSite
+    LogLevel: debug
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  memorySize: 128
+  timeout: 10
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  apiGateway:
+    restApiId:
+      'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-restApiId-${self:provider.stage}
+    restApiRootResourceId:
+      'Fn::ImportValue': ${self:custom.${self:provider.stage}.Stack}-rootResourceId-${self:provider.stage}
+  logRetentionInDays: 14
+  environment:
+    logLevel: ${self:custom.${self:provider.stage}.LogLevel}
+
+functions:
+  User:
+    handler: index.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:Scan
+        Resource:
+          - arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/${self:custom.${self:provider.stage}.Stack}-Users-${self:provider.stage}
+    environment:
+      usersTable: ${self:custom.${self:provider.stage}.Stack}-Users-${self:provider.stage}
+    events:
+      - http:
+          path: /user
+          method: get
+          cors: true
+      - http:
+          path: /user
+          method: post
+          cors: true
+      - http:
+          path: /user/{userid}
+          method: get
+          cors: true
+
+resources:
+  Outputs:
+    ApiRootUser:
+      Value:
+        Ref: ApiGatewayResourceUser
+      Export:
+        Name: ${self:custom.${self:provider.stage}.Stack}-ApiRootUser-${self:provider.stage}
+    ApiRootUserUseridVar:
+      Value:
+        Ref: ApiGatewayResourceUserUseridVar
+      Export:
+        Name: ${self:custom.${self:provider.stage}.Stack}-ApiRootUserUseridVar-${self:provider.stage}
+
+plugins:
+  - serverless-pseudo-parameters
+  - serverless-iam-roles-per-function
+  - serverless-plugin-reducer

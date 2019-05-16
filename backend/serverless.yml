@@ -18,23 +18,23 @@ custom:
     ApiHostedZone: examplesite.us.
     ApiSite: "prod.examplesite.us"
     ApiCert: "arn:aws:acm:us-east-1:12345678901:certificate/12345678-b123-a123-c123-abcd1234efgh"
-    StateTableRCU: 5
-    StateTableWCU: 5
-    UsersTableRCU: 5
-    UsersTableWCU: 5
+    OrdersTableRCU: 1
+    OrdersTableWCU: 1
+    UsersTableRCU: 1
+    UsersTableWCU: 1
   dev:
     Stack: ExampleSite
     LogLevel: debug
     ApiHostedZone: examplesite.us.
     ApiSite: "dev.examplesite.us"
     ApiCert: "arn:aws:acm:us-east-1:12345678901:certificate/12345678-b123-a123-c123-abcd1234efgh"
-    StateTableRCU: 5
-    StateTableWCU: 5
-    UsersTableRCU: 5
-    UsersTableWCU: 5
+    OrdersTableRCU: 1
+    OrdersTableWCU: 1
+    UsersTableRCU: 1
+    UsersTableWCU: 1
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs10.x
   memorySize: 128
   timeout: 10
   region: us-east-1
@@ -50,33 +50,36 @@ package:
 functions:
   # API Root Function, for a health check.
   Root:
-    handler: src/index.handler
+    handler: src/_root/index.handler
     events:
       - http:
           path: /
           method: get
           cors: true
-  # User writes to user table, and sends a message to the State function, which writes to the State table.
-  User:
-    handler: src/user/index.handler
+  # When an order is created, it will place a message in the OrdersQueue to fulfill the order.
+  Orders:
+    handler: src/orders/index.handler
     environment:
-      stateQueueUrl: !Ref StateQueue
-      usersTable: !Ref UsersTable
-    iamRoleStatements: ${file(resources/iam/UserExecutionRole.yml)}
-    events:
-      - schedule:
-          rate: rate(1 minute)
-  State:
-    handler: src/state/index.handler
-    environment:
-      stateQueueUrl: !Ref StateQueue
-      stateTable: !Ref StateTable
-    iamRoleStatements: ${file(resources/iam/StateExecutionRole.yml)}
+      ordersQueueUrl: !Ref OrdersQueue
+      ordersTable: !Ref OrdersTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource:
+          - arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/${self:custom.${self:provider.stage}.Stack}-Orders-${self:provider.stage}
+      - Effect: Allow
+        Action:
+          - sqs:ReceiveMessage
+          - sqs:DeleteMessage
+          - sqs:GetQueueAttributes
+        Resource:
+          - arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:custom.${self:provider.stage}.Stack}-OrdersQueue-${self:provider.stage}
     events:
       - sqs:
           arn:
             Fn::GetAtt:
-              - StateQueue
+              - OrdersQueue
               - Arn
           batchSize: 1
 resources:
@@ -85,10 +88,10 @@ resources:
 
   # Two DynamoDB tables
   - ${file(resources/dynamodb/UsersTable.yml)}
-  - ${file(resources/dynamodb/StateTable.yml)}
+  - ${file(resources/dynamodb/OrdersTable.yml)}
 
   # Platform for our two functions to communicate.
-  - ${file(resources/sqs/StateQueue.yml)}
+  - ${file(resources/sqs/OrdersQueue.yml)}
   # Here we are exporting the RestApiID and the RootResourceId to use in other API Endpoints.
   - Outputs:
       ApiGWRestApiId:

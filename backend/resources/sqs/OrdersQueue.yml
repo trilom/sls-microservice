@@ -1,9 +1,9 @@
 Resources:
-  StateQueue:
+  OrdersQueue:
     Type: AWS::SQS::Queue
     Properties:
       DelaySeconds: 0
       MaximumMessageSize: 262144 # 256kb in bytes, maximum
       MessageRetentionPeriod: 345600 # 4 days in seconds
-      QueueName: ${self:custom.${self:provider.stage}.Stack}-StateQueue-${self:provider.stage}
+      QueueName: ${self:custom.${self:provider.stage}.Stack}-OrdersQueue-${self:provider.stage}
       VisibilityTimeout: 30
