@@ -58,7 +58,6 @@ _createEndpoint:
 	@yarn add --dev --cwd ./src/${SERVICE} serverless-pseudo-parameters
 	@yarn add --dev --cwd ./src/${SERVICE} serverless-iam-roles-per-function
 	@yarn add --dev --cwd ./src/${SERVICE} serverless-plugin-reducer
-	@yarn add --dev --cwd ./src/${SERVICE} '@serverless/enterprise-plugin'
 
 _removeAll:
 	@find ./src -depth -type d -not -name 'src' -not -path "*/node_modules/*" -not -name 'node_modules' -not -name '.serverless' > results.txt
