@@ -1,5 +1,8 @@
 # Serverless Microservice Framework
 
+## Diagram:
+![api diagram](https://github.com/trilom/sls-microservice/blob/master/sls-microservice.jpg "API Diagram")
+
 ## How to use:
 Like all infrastructure stacks, there is some soft of backend, and frontend.  In this case, our frontend is an API and out backend is just a cron job.  
 In order to use this stack you simply run the `make buildAll` and `make deployAll` command from within the `./backend` directory.  
@@ -30,7 +33,6 @@ The API functions are split into 3 endpoints where you can implement different p
 `/order/{orderid}` __GET__ - _Get order information._  
 
 ### Things to note
----
 #### API Gateway RestApiId Exports and Usage
 ---
 Take note in the `./backend/serverless.yml` we are exporting two variables from the stack.  This is for reuse in our child API endpoint stacks:
