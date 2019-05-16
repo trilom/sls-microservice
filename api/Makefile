@@ -13,7 +13,7 @@ removeAll:
 	$(info [*] Removing dev env for all....)
 	@$(MAKE) _removeAll
 
-clean: _check_service_definition ##=> Deletes current build environment and latest build
+clean: _check_service_definition
 	$(info [*] Who needs all that anyway? Destroying environment....)
 	@rm -rf ./src/${SERVICE}/node_modules
 	@rm -rf ./src/${SERVICE}/.serverless
@@ -58,6 +58,12 @@ _createEndpoint:
 	@yarn add --dev --cwd ./src/${SERVICE} serverless-pseudo-parameters
 	@yarn add --dev --cwd ./src/${SERVICE} serverless-iam-roles-per-function
 	@yarn add --dev --cwd ./src/${SERVICE} serverless-plugin-reducer
+	@yarn add --cwd ./src/${SERVICE} body-parser
+	@yarn add --cwd ./src/${SERVICE} cors
+	@yarn add --cwd ./src/${SERVICE} express
+	@yarn add --cwd ./src/${SERVICE} moment
+	@yarn add --cwd ./src/${SERVICE} serverless-http
+	@yarn add --cwd ./src/${SERVICE} log4js
 
 _removeAll:
 	@find ./src -depth -type d -not -name 'src' -not -path "*/node_modules/*" -not -name 'node_modules' -not -name '.serverless' > results.txt
