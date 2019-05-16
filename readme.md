@@ -4,7 +4,7 @@
 ![api diagram](https://github.com/trilom/sls-microservice/blob/master/sls-microservice.jpg "API Diagram")
 
 ## How to use:
-Like all infrastructure stacks, there is some soft of backend, and frontend.  In this case, our frontend is an API and out backend is just a cron job.  
+Like all infrastructure stacks, there is some soft of backend, and frontend.  In this case we have a front end implemented with API Gateway and a simple backend with 2 tables and a SQS queue to trigger a function.  
 In order to use this stack you simply run the `make buildAll` and `make deployAll` command from within the `./backend` directory.  
 
 ## Why is it designed like this:
