@@ -17,13 +17,12 @@ The backend function will look for messages in the Order queue, then move them t
 The API functions are split into 3 endpoints where you can implement different packages scope.
 
 #### Endpoints
-⋅⋅⋅`/user` __GET__ - _List of users._
-⋅⋅⋅`/user` __POST__ - _Create a user._
-⋅⋅⋅`/user/{userid}` __GET__ - _User information._
-⋅⋅⋅`/user/{userid}/orders` __GET__ - _Get order information for user._
-
-⋅⋅⋅`/order` __POST__ - _Create an order._
-⋅⋅⋅`/order/{orderid}` __GET__ - _Get order information._
+`/user` __GET__ - _List of users._  
+`/user` __POST__ - _Create a user._  
+`/user/{userid}` __GET__ - _User information._  
+`/user/{userid}/orders` __GET__ - _Get order information for user._  
+`/order` __POST__ - _Create an order._  
+`/order/{orderid}` __GET__ - _Get order information._  
 
 ### What does this do?
 #### `make buildAll`
