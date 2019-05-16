@@ -1,29 +1,29 @@
 # Serverless Microservice Framework
 
 ## How to use:
-Like all infrastructure stacks, there is some soft of backend, and frontend.  In this case, our frontend is an API and out backend is just a cron job.
-In order to use this stack you simply run the `make buildAll` and `make deployAll` command from within the `./backend` directory.
+⋅⋅⋅Like all infrastructure stacks, there is some soft of backend, and frontend.  In this case, our frontend is an API and out backend is just a cron job.
+⋅⋅⋅In order to use this stack you simply run the `make buildAll` and `make deployAll` command from within the `./backend` directory.
 
 ### What does this build?
 This will define an example Serverless infrastructure stack containing:
-1.) an API Gateway
+1. an API Gateway
 The API has 6 endpoints.  One to create a user, one to get a user information, one to get a list of users, and one to get order information for that user.
-2.) two DynamoDB tables
+2. two DynamoDB tables
 One is the user table and one is the order table.
-3.) a SQS queue
+3. a SQS queue
 An SQS queue that looks out for orders and moves them to fulfillment.
-4.) one backend lambda function, and three api lambda functions
+4. one backend lambda function, and three api lambda functions
 The backend function will look for messages in the Order queue, then move them to fulfillment.
 The API functions are split into 3 endpoints where you can implement different packages scope.
 
 #### Endpoints
-`/user` __GET__ - _List of users._
-`/user` __POST__ - _Create a user._
-`/user/{userid}` __GET__ - _User information._
-`/user/{userid}/orders` __GET__ - _Get order information for user._
-`
-`/order` __POST__ - _Create an order._
-`/order/{orderid}` __GET__ - _Get order information._
+⋅⋅⋅`/user` __GET__ - _List of users._
+⋅⋅⋅`/user` __POST__ - _Create a user._
+⋅⋅⋅`/user/{userid}` __GET__ - _User information._
+⋅⋅⋅`/user/{userid}/orders` __GET__ - _Get order information for user._
+
+⋅⋅⋅`/order` __POST__ - _Create an order._
+⋅⋅⋅`/order/{orderid}` __GET__ - _Get order information._
 
 ### What does this do?
 #### `make buildAll`
@@ -56,6 +56,6 @@ This will remove the serverless project, deleting the backend infrastructure.
 This will remove the `.serverless` and `node_modules/**` directory for the backend.
 
 ## What do do from here:
-In more complicated examples you would be able to use AWS Cognito in the `/user` endpoint to set up authentication.  This endpoint would be scoped for user functions around Cognito and will likely have similar imports.
-You could also import Stripe in a `/billing` endpoint to facilitate collection of payment information.
-Withen the `/orders` endpoint, you can set up your DynamoDB queries for managing your order collection.
+⋅⋅⋅In more complicated examples you would be able to use AWS Cognito in the `/user` endpoint to set up authentication.  This endpoint would be scoped for user functions around Cognito and will likely have similar imports.
+⋅⋅⋅You could also import Stripe in a `/billing` endpoint to facilitate collection of payment information.
+⋅⋅⋅Within the `/orders` endpoint, you can set up your DynamoDB queries for managing your order collection.
