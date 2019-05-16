@@ -14,7 +14,7 @@ In order to gain fine control over each endpoint of your API this allows you to 
 ---
 This will define an example Serverless infrastructure stack containing:
 1. an API Gateway
-The API has 6 endpoints.  One to create a user, one to get a user information, one to get a list of users, and one to get order information for that user.
+The API has 6 endpoints.  One to create a user, one to get a user information, one to get a list of users, one to get a list of orders for a user, one to get order information for that user, and one to create an order.
 2. two DynamoDB tables
 One is the user table and one is the order table.
 3. a SQS queue
@@ -98,7 +98,7 @@ provider:
 ### Commands
 ---
 #### `make buildAll`
-First it will run `yarn install` in the `./backend` directory and then it will run `make buildAll` from the `./api` directory.  This will look at each directory in the `./api/src` directory and run `yarn install` for each.
+First it will run `yarn install` in the `./backend` directory, then it will look at each directory in the `./backend/src` directory and run `yarn install` for each, then it will run `make buildAll` from the `./api` directory.  This will look at each directory in the `./api/src` directory and run `yarn install` for each.
 #### `make deployAll --STAGE='dev'`
 First it will run `serverless deploy --stage dev` in the `./backend` directory and then it will run `make deployAll --STAGE='dev'` from the `./api` directory.  This will look at each directory in the `./api/src` directory and run `serverless deploy --stage dev` for each.
 
