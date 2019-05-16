@@ -1,8 +1,8 @@
 # Serverless Microservice Framework
 
 ## How to use:
-⋅⋅⋅Like all infrastructure stacks, there is some soft of backend, and frontend.  In this case, our frontend is an API and out backend is just a cron job.
-⋅⋅⋅In order to use this stack you simply run the `make buildAll` and `make deployAll` command from within the `./backend` directory.
+Like all infrastructure stacks, there is some soft of backend, and frontend.  In this case, our frontend is an API and out backend is just a cron job.  
+In order to use this stack you simply run the `make buildAll` and `make deployAll` command from within the `./backend` directory.  
 
 ### What does this build?
 This will define an example Serverless infrastructure stack containing:
@@ -56,6 +56,6 @@ This will remove the serverless project, deleting the backend infrastructure.
 This will remove the `.serverless` and `node_modules/**` directory for the backend.
 
 ## What do do from here:
-⋅⋅⋅In more complicated examples you would be able to use AWS Cognito in the `/user` endpoint to set up authentication.  This endpoint would be scoped for user functions around Cognito and will likely have similar imports.
-⋅⋅⋅You could also import Stripe in a `/billing` endpoint to facilitate collection of payment information.
-⋅⋅⋅Within the `/orders` endpoint, you can set up your DynamoDB queries for managing your order collection.
+In more complicated examples you would be able to use AWS Cognito in the `/user` endpoint to set up authentication.  This endpoint would be scoped for user functions around Cognito and will likely have similar imports.  
+You could also import Stripe in a `/billing` endpoint to facilitate collection of payment information.  
+Within the `/orders` endpoint, you can set up your DynamoDB queries for managing your order collection.  
